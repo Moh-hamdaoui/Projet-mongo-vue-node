@@ -10,6 +10,6 @@ router.get('/', auth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs', error: err });
   }
-})
+});
 
 module.exports = router;
