@@ -26,12 +26,12 @@ exports.getTasksByProject = async (req, res) => {
   try {
     const tasks = await Task.find({ 
       project: req.params.projectId 
-    }).populate('assignedTo', 'name')
-    res.status(200).json(tasks)
+    }).populate('assignedTo', 'name');
+    res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la récupération des tâches', error })
+    res.status(500).json({ message: 'Erreur lors de la récupération des tâches', error });
   }
-}
+};
 
 exports.updateTask = async (req, res) => {
   try {
