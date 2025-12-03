@@ -1,11 +1,9 @@
-import eslint from "eslint";
-
-export default [
+module.exports = [
   {
     files: ["**/*.js"],
     languageOptions: {
       ecmaVersion: 2020,
-      sourceType: "module",
+      sourceType: "script", 
     },
     rules: {
       "no-unused-vars": "warn",
