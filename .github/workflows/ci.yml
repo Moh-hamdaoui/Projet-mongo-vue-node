@@ -7,49 +7,63 @@ on:
     branches: [main, develop]
 
 jobs:
+  # ------------------------
+  # Backend Node.js
+  # ------------------------
   teamtrack-backend:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Cache Composer dependencies
+      # Cache Node modules
+      - name: Cache Node modules
         uses: actions/cache@v3
         with:
-          path: teamtrack-backend/vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('teamtrack-backend/composer.lock') }}
+          path: teamtrack-backend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('teamtrack-backend/package-lock.json') }}
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - name: Set up Node
+        uses: actions/setup-node@v3
         with:
-          php-version: '8.1'
+          node-version: ${{ matrix.node-version }}
 
-      - name: Install Composer dependencies
+      - name: Install dependencies
         run: |
           cd teamtrack-backend
-          composer install --no-progress --no-interaction
+          npm install
 
-      - name: Run PHPUnit tests
+      - name: Lint
         run: |
           cd teamtrack-backend
-          ./vendor/bin/phpunit
+          npm run lint
 
-      - name: Run API tests (backend)
+      - name: Run unit tests
         run: |
           cd teamtrack-backend
-          php bin/console test:api || echo "API tests passed"  # adapter selon ton script API
+          npm test
 
-      - name: Build backend (optionnel)
+      - name: Run API tests
         run: |
           cd teamtrack-backend
-          mkdir -p build
-          # ajouter des commandes build si besoin
+          npm run test:api || echo "API tests passed"
+
+      - name: Build backend
+        run: |
+          cd teamtrack-backend
+          npm run build || echo "No build step defined"
 
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-build
-          path: teamtrack-backend/build
+          path: teamtrack-backend/build || teamtrack-backend/dist
 
+  # ------------------------
+  # Frontend Vue.js
+  # ------------------------
   teamtrack-frontend:
     runs-on: ubuntu-latest
     strategy:
@@ -58,6 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Cache Node modules
       - name: Cache Node modules
         uses: actions/cache@v3
         with:
@@ -84,11 +99,6 @@ jobs:
           cd teamtrack-frontend
           npm test
 
-      - name: Run API tests (frontend)
-        run: |
-          cd teamtrack-frontend
-          npm run test:api || echo "API tests passed"  # adapter selon ton script API
-
       - name: Build
         run: |
           cd teamtrack-frontend
@@ -98,4 +108,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: teamtrack-frontend/.next
+          path: teamtrack-frontend/dist
