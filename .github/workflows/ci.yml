@@ -45,7 +45,7 @@ jobs:
           # ajouter des commandes build si besoin
 
       - name: Upload backend artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: teamtrack-backend/build
@@ -95,7 +95,7 @@ jobs:
           npm run build
 
       - name: Upload frontend artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: teamtrack-frontend/.next
