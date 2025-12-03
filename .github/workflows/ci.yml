@@ -33,17 +33,17 @@ jobs:
       - name: Install dependencies
         run: |
           cd teamtrack-backend
-          npm install
+          npm ci
 
-      - name: Lint
+      - name: Lint backend
         run: |
           cd teamtrack-backend
-          npm install -g eslint
+          npx eslint . --ext .js
 
       - name: Run unit tests
         run: |
           cd teamtrack-backend
-          npm test
+          npx jest --force-exit --detectOpenHandles
 
       - name: Run API tests
         run: |
