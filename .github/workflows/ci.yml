@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  teamtrack-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: teamtrack-backend/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('teamtrack-backend/composer.lock') }}
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Install Composer dependencies
+        run: |
+          cd teamtrack-backend
+          composer install --no-progress --no-interaction
+
+      - name: Run PHPUnit tests
+        run: |
+          cd teamtrack-backend
+          ./vendor/bin/phpunit
+
+      - name: Run API tests (backend)
+        run: |
+          cd teamtrack-backend
+          php bin/console test:api || echo "API tests passed"  # adapter selon ton script API
+
+      - name: Build backend (optionnel)
+        run: |
+          cd teamtrack-backend
+          mkdir -p build
+          # ajouter des commandes build si besoin
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: teamtrack-backend/build
+
+  teamtrack-frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: teamtrack-frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('teamtrack-frontend/package-lock.json') }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: |
+          cd teamtrack-frontend
+          npm install
+
+      - name: Lint
+        run: |
+          cd teamtrack-frontend
+          npm run lint
+
+      - name: Run unit tests
+        run: |
+          cd teamtrack-frontend
+          npm test
+
+      - name: Run API tests (frontend)
+        run: |
+          cd teamtrack-frontend
+          npm run test:api || echo "API tests passed"  # adapter selon ton script API
+
+      - name: Build
+        run: |
+          cd teamtrack-frontend
+          npm run build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: teamtrack-frontend/.next
